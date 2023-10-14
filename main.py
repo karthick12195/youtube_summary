@@ -5,14 +5,7 @@ import pandas as pd
 import google.generativeai as palm
 import re
 
-LOCAL = False
-
-if LOCAL:
-    import config
-    palm.configure(api_key=config.palm_api_key)
-
-else:
-    palm.configure(api_key=st.secrets["palm_api_key"])
+palm.configure(api_key=st.secrets["palm_api_key"])
 
 def palm_gen_recipe(transcript):
     st.text("Captions has {} words".format(len(transcript.split(' '))))
@@ -36,7 +29,10 @@ def palm_gen_recipe(transcript):
             **defaults,
             prompt=prompt
         )
-        return response.result
+        if response.result:
+            return response.result
+        else:
+            return 'Palm API is unable to summarize this video due to safety concerns'
     except:
         return "Not Supported"
 
@@ -47,8 +43,13 @@ video_url = st.text_input('Enter the YouTube video URL to summarize...')
 
 if video_url:
     v_id = re.findall(r"(\?v=)(.*)&?", video_url)[0][1]
+    st.markdown('Watch the video [here](https://www.youtube.com/watch?v={})'.format(v_id))
+    st.markdown('### Video Summary')
+    try:
+        transcript = YouTubeTranscriptApi.get_transcript(v_id, languages=['en', 'en-GB', 'hi', 'en-IN'])
+        transcript_txt = TextFormatter().format_transcript(transcript)
+        st.markdown(palm_gen_recipe(transcript_txt))
+    except:
+        st.markdown('No transcripts available for this video')
 
-    transcript = YouTubeTranscriptApi.get_transcript(v_id, languages=['en', 'en-GB', 'hi', 'en-IN'])
-    transcript_txt = TextFormatter().format_transcript(transcript)
 
-    st.markdown(palm_gen_recipe(transcript_txt))
