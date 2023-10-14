@@ -3,11 +3,16 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 import pandas as pd
 import google.generativeai as palm
-import config
 import re
 
-palm.configure(api_key=config.palm_api_key)
+LOCAL = False
 
+if LOCAL:
+    import config
+    palm.configure(api_key=config.palm_api_key)
+
+else:
+    palm.configure(api_key=st.secrets["palm_api_key"])
 
 def palm_gen_recipe(transcript):
     st.text("Captions has {} words".format(len(transcript.split(' '))))
