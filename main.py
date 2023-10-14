@@ -45,9 +45,10 @@ st.title('Summarize YT videos using captions')
 
 video_url = st.text_input('Enter the YouTube video URL to summarize...')
 
-v_id = re.findall(r"(\?v=)(.*)&?", video_url)[0][1]
+if video_url:
+    v_id = re.findall(r"(\?v=)(.*)&?", video_url)[0][1]
 
-transcript = YouTubeTranscriptApi.get_transcript(v_id, languages=['en', 'en-GB', 'hi', 'en-IN'])
-transcript_txt = TextFormatter().format_transcript(transcript)
+    transcript = YouTubeTranscriptApi.get_transcript(v_id, languages=['en', 'en-GB', 'hi', 'en-IN'])
+    transcript_txt = TextFormatter().format_transcript(transcript)
 
-st.markdown(palm_gen_recipe(transcript_txt))
+    st.markdown(palm_gen_recipe(transcript_txt))
